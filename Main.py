@@ -198,4 +198,40 @@ with open('voyages.csv', 'w', newline='') as voyagefile:
 
         voyageWriter.writerow([key, finalStartDate, finalEndDate, startingPortID, endingPortID])
 
+with open('predict.csv', 'w', newline='') as predictfile:
+    predictWriter = csv.writer(predictfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    predictWriter.writerow(['vessel', 'begin_port_id', 'end_port_id','voyage'])
+    for key in boats:
+        boat = boats[key]
+        boat.ports.sort(key=TimeStamp)
+        startingPort = boat.ports[0]
+        startingPortID = ports[startingPort.latLong.lat]
+        endingPort = boat.ports[len(boat.ports) - 1]
+        endingPortID = ports[endingPort.latLong.lat]
+        # determine when arriving at ending port (first recorded time getting to port)
+
+        string = ""
+        endingPortSet = False
+        for port in boat.ports:
+            # determine when leaving starting port (last recorded time leaving port)
+            if port.latLong == startingPort.latLong:
+                startingPort = port
+
+            # determine when arriving at ending port (first recorded time getting to port)
+            if port.latLong == endingPort.latLong and not endingPortSet:
+                endingPort = port
+                endingPortSet = True
+            #string += "{" + str(port.latLong.lat) +", " + str(port.latLong.long) + ", " + str(port.date) + "}, "
+        #startstring = "{" + str(startingPort.latLong.lat) + ", " + str(startingPort.latLong.long) + "}(" + startingPortID + ")"
+        #endstring = "{" + str(endingPort.latLong.lat) + ", " + str(endingPort.latLong.long) + "}(" + endingPortID + ")"
+        #print(str(boat.voyageNumber) + ": " + "starting port " + startstring + "  endingPort " + endstring + "   ports: " + string)
+
+        finalStartDate = ConvertFromMinutesToDateStr(startingPort.date)
+        finalEndDate = ConvertFromMinutesToDateStr(endingPort.date)
+
+        testToPandas = pd.to_datetime(finalStartDate)
+        testToPandas = pd.to_datetime(finalEndDate)
+        for voyageID in range(1, 4):
+            predictWriter.writerow([key, startingPortID, endingPortID, str(voyageID)])
+
 # use ml to predict future points using past points and use points given for testing
