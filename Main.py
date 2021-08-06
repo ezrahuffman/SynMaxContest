@@ -8,6 +8,7 @@ import math
 numberOfPorts = 802000
 R = 6373.0
 Epsilon = 10  # kilometers
+minSpeed = .3 # knots
 
 
 # determine what ports the ship visits
@@ -90,7 +91,7 @@ class Boat:
         shipPort = GetPort(currPoint)
         # need to add sorting by time
         if shipPort != Lat_Long(-1, -1) and shipPort != self.lastPort:
-            self.ports.append(TrackingPoint(self.voyageNumber, currPoint.date, shipPort.lat, shipPort.long, 0, 0, currPoint.draft))
+            self.ports.append(TrackingPoint(self.voyageNumber, currPoint.date, shipPort.lat, shipPort.long, currPoint.heading, currPoint.speed, currPoint.draft))
             self.portNames.append("{" + str(shipPort.lat) + ", " + str(shipPort.long) + "}")
 
         self.lastPort = port
@@ -117,6 +118,49 @@ def GetPort(currPoint):
         if dist < Epsilon:
             return shipPort
     return Lat_Long(-1, -1)
+
+
+def FindAllVoyages(allPorts):
+
+    p1 = None
+    p2 = None
+
+    stopped = False
+
+    returnArr = []
+    lastTimeInPort = None
+
+    for shipPort in allPorts:
+        if stopped:
+            if shipPort.speed > minSpeed:
+                # starting to move again
+                # ship has to leave from last port it arrived at
+                if shipPort.latLong != p2.latLong:
+                    p1 = lastTimeInPort
+                else:
+                    p1 = p2
+                stopped = False
+            elif shipPort.latLong == p2.latLong:
+                # still in last port
+                lastTimeInPort = shipPort
+        else:
+            if shipPort.speed <=minSpeed:
+                # arriving at first port
+                if p1 == None:
+                    p2 = shipPort
+                    stopped = True
+                #arriving at next port (not the same as port that was last departed from)
+                elif shipPort.latLong != p1.latLong:
+                    p2 = shipPort
+                    returnArr.append([p1, p2])
+                    stopped = True
+                # still in the same port (don't log as stopped)
+                else:
+                    stopped = False
+
+    return returnArr
+
+
 
 
 #def YMD_To_Sec(ymd):
@@ -149,7 +193,15 @@ with open('tracking.csv', newline='') as trackingfile:
     for row in reader:
         rowcount+=1
         # create tracking point with given row
-        point = TrackingPoint(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+
+        # find a better way to deal with null values
+        if (row[4] == 'NULL'):
+            row[4] = 1
+        if (row[5] == 'NULL'):
+            row[5] = 1
+        if (row[6] == 'NULL'):
+            row[6] = 1
+        point = TrackingPoint(row[0], row[1], row[2], row[3], float(row[4]), float(row[5]), float(row[6]))
 
         # create dictionary of boats
         if row[0] not in boats:
@@ -173,30 +225,20 @@ with open('voyages.csv', 'w', newline='') as voyagefile:
         endingPort = boat.ports[len(boat.ports) - 1]
         endingPortID = ports[endingPort.latLong.lat]
         # determine when arriving at ending port (first recorded time getting to port)
+        voyagePorts = FindAllVoyages(boat.ports)
 
         string = ""
         endingPortSet = False
-        for port in boat.ports:
-            # determine when leaving starting port (last recorded time leaving port)
-            if port.latLong == startingPort.latLong:
-                startingPort = port
+        for portSet in voyagePorts:
+            startingPort = portSet[0]
+            startingPortID = ports[startingPort.latLong.lat]
+            endingPort = portSet[1]
+            endingPortID = ports[endingPort.latLong.lat]
 
-            # determine when arriving at ending port (first recorded time getting to port)
-            if port.latLong == endingPort.latLong and not endingPortSet:
-                endingPort = port
-                endingPortSet = True
-            #string += "{" + str(port.latLong.lat) +", " + str(port.latLong.long) + ", " + str(port.date) + "}, "
-        #startstring = "{" + str(startingPort.latLong.lat) + ", " + str(startingPort.latLong.long) + "}(" + startingPortID + ")"
-        #endstring = "{" + str(endingPort.latLong.lat) + ", " + str(endingPort.latLong.long) + "}(" + endingPortID + ")"
-        #print(str(boat.voyageNumber) + ": " + "starting port " + startstring + "  endingPort " + endstring + "   ports: " + string)
+            finalStartDate = ConvertFromMinutesToDateStr(startingPort.date)
+            finalEndDate = ConvertFromMinutesToDateStr(endingPort.date)
 
-        finalStartDate = ConvertFromMinutesToDateStr(startingPort.date)
-        finalEndDate = ConvertFromMinutesToDateStr(endingPort.date)
-
-        testToPandas = pd.to_datetime(finalStartDate)
-        testToPandas = pd.to_datetime(finalEndDate)
-
-        voyageWriter.writerow([key, finalStartDate, finalEndDate, startingPortID, endingPortID])
+            voyageWriter.writerow([key, finalStartDate, finalEndDate, startingPortID, endingPortID])
 
 with open('predict.csv', 'w', newline='') as predictfile:
     predictWriter = csv.writer(predictfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
