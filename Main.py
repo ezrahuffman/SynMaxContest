@@ -7,7 +7,7 @@ import math
 
 numberOfPorts = 802000
 R = 6373.0
-Epsilon = 1  # kilometers
+Epsilon = 10  # kilometers
 
 
 # determine what ports the ship visits
@@ -200,7 +200,7 @@ with open('voyages.csv', 'w', newline='') as voyagefile:
 
 with open('predict.csv', 'w', newline='') as predictfile:
     predictWriter = csv.writer(predictfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    predictWriter.writerow(['vessel', 'begin_port_id', 'end_port_id','voyage'])
+    predictWriter.writerow(['vessel', 'begin_port_id', 'end_port_id', 'voyage'])
     for key in boats:
         boat = boats[key]
         boat.ports.sort(key=TimeStamp)
