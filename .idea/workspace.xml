@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4e7f9af1-cb45-43f2-b6b9-2ca0335f8af5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/predict.csv" afterDir="false" />
+    <list default="true" id="4e7f9af1-cb45-43f2-b6b9-2ca0335f8af5" name="Default Changelist" comment="Changed the radius of the search around ports">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/predict.csv" beforeDir="false" afterPath="$PROJECT_DIR$/predict.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voyages.csv" beforeDir="false" afterPath="$PROJECT_DIR$/voyages.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +106,14 @@
       <workItem from="1628197089824" duration="1542000" />
       <workItem from="1628198763517" duration="70000" />
       <workItem from="1628198937556" duration="244000" />
-      <workItem from="1628199509338" duration="1673000" />
+      <workItem from="1628199509338" duration="1924000" />
+      <workItem from="1628209089521" duration="2209000" />
+      <workItem from="1628266800297" duration="4625000" />
+      <workItem from="1628281736428" duration="3756000" />
+      <workItem from="1628362962145" duration="3976000" />
+      <workItem from="1628456925751" duration="2648000" />
+      <workItem from="1628537628951" duration="6824000" />
+      <workItem from="1628607497155" duration="3673000" />
     </task>
     <task id="LOCAL-00001" summary="Added synced requiremnts file">
       <created>1628199713310</created>
@@ -114,7 +122,28 @@
       <option name="project" value="LOCAL" />
       <updated>1628199713310</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Added synced requiremnts file">
+      <created>1628202060813</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1628202060813</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Changed the radius of the search around ports">
+      <created>1628210597596</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1628210597596</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Changed Port detection: Must leave from the port previously arrived at. &#10;&#10;Changed Interpretation of Q1: Not asking for first and last port, but all ports and the 'voyage' from one to the other, basically path and not start and finnish.">
+      <created>1628287120294</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1628287120294</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -122,9 +151,11 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added synced requiremnts file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added synced requiremnts file" />
+    <MESSAGE value="Changed the radius of the search around ports" />
+    <MESSAGE value="Changed Port detection: Must leave from the port previously arrived at. &#10;&#10;Changed Interpretation of Q1: Not asking for first and last port, but all ports and the 'voyage' from one to the other, basically path and not start and finnish." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed Port detection: Must leave from the port previously arrived at. &#10;&#10;Changed Interpretation of Q1: Not asking for first and last port, but all ports and the 'voyage' from one to the other, basically path and not start and finnish." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/SynMax$Main.coverage" NAME="Main Coverage Results" MODIFIED="1628200598142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SynMax$Main.coverage" NAME="Main Coverage Results" MODIFIED="1628611152128" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

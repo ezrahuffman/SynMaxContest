@@ -7,8 +7,8 @@ import math
 
 numberOfPorts = 802000
 R = 6373.0
-Epsilon = 10  # kilometers
-minSpeed = .3 # knots
+Epsilon = 25  # kilometers
+minSpeed = 3  # knots
 
 
 # determine what ports the ship visits
@@ -16,7 +16,7 @@ minSpeed = .3 # knots
 # use ml to predict future points using past points and use points given for testing
 
 def ConvertToMinutes(date):
-    arr = date.split(" ");
+    arr = date.split(" ")
     date = arr[0].split("/")
     months = int(date[0])
     days = int(date[1])
@@ -102,6 +102,8 @@ def GetPort(currPoint):
     lat1 = math.radians(currPoint.latLong.lat)
     long1 = math.radians(currPoint.latLong.long);
 
+    minDist = math.inf
+    retPort = None
     for shipPort in portList:
         lat2 = math.radians(shipPort.lat)
         long2 = math.radians(shipPort.long)
@@ -115,8 +117,13 @@ def GetPort(currPoint):
         dist = R * c
 
         # print(dist)
-        if dist < Epsilon:
-            return shipPort
+        if dist < Epsilon and dist < minDist:
+            minDist = dist
+            retPort = shipPort
+
+    if retPort is not None:
+        return retPort
+
     return Lat_Long(-1, -1)
 
 
@@ -130,33 +137,60 @@ def FindAllVoyages(allPorts):
     returnArr = []
     lastTimeInPort = None
 
+    '''
+    # New
+    # for shipPort in allPorts:
+    #     if stopped:
+    #         if shipPort.speed > minSpeed:
+    #             # starting to move again
+    #             # ship has to leave from last port it arrived at
+    #             if shipPort.latLong != p2.latLong:
+    #                 p1 = lastTimeInPort
+    #             else:
+    #                 p1 = shipPort
+    #             stopped = False
+    #         elif shipPort.latLong == p2.latLong:
+    #             # still in last port
+    #             lastTimeInPort = shipPort
+    #     else:
+    #         if shipPort.speed <=minSpeed:
+    #             # arriving at first port
+    #             if p1 == None:
+    #                 p2 = shipPort
+    #                 stopped = True
+    #             #arriving at next port (not the same as port that was last departed from)
+    #             elif shipPort.latLong != p1.latLong:
+    #                 p2 = shipPort
+    #                 returnArr.append([p1, p2])
+    #                 stopped = True
+    #             # still in the same port (don't log as stopped)
+    #             else:
+    #                 stopped = False
+    '''
+
+    # Old
     for shipPort in allPorts:
-        if stopped:
-            if shipPort.speed > minSpeed:
-                # starting to move again
-                # ship has to leave from last port it arrived at
-                if shipPort.latLong != p2.latLong:
-                    p1 = lastTimeInPort
-                else:
-                    p1 = p2
-                stopped = False
-            elif shipPort.latLong == p2.latLong:
-                # still in last port
-                lastTimeInPort = shipPort
-        else:
-            if shipPort.speed <=minSpeed:
-                # arriving at first port
-                if p1 == None:
-                    p2 = shipPort
+        if not stopped:
+            if shipPort.speed <= minSpeed:
+                #check that ship is not in same port
+                if p1 is None:
                     stopped = True
-                #arriving at next port (not the same as port that was last departed from)
+                # check that ship is not still in the same port
                 elif shipPort.latLong != p1.latLong:
                     p2 = shipPort
                     returnArr.append([p1, p2])
                     stopped = True
-                # still in the same port (don't log as stopped)
-                else:
+        else:
+            if shipPort.speed > minSpeed:
+                if p2 is None or shipPort.latLong == p2.latLong:
+                    p1 = shipPort
                     stopped = False
+                elif shipPort.latLong != p2.latLong and lastTimeInPort is not None:
+                    p1 = lastTimeInPort
+                    lastTimeInPort = None
+                    stopped = False
+            elif p2 is None or shipPort.latLong == p2.latLong:
+                lastTimeInPort = shipPort
 
     return returnArr
 
@@ -175,6 +209,8 @@ portList = []
 
 rowcount = 0
 
+# clean this up once voyages are accurate: should get the same exact output
+
 # import contents from file
 with open('ports.csv', newline='') as portsfile:
     reader = csv.reader(portsfile, delimiter=' ', quotechar='}')
@@ -183,7 +219,7 @@ with open('ports.csv', newline='') as portsfile:
         # create LatLong point with given row
         port = Lat_Long(row[1], row[2])
 
-        ##create dictionary of ports
+        # create dictionary of ports
         if port.lat not in ports:
             ports[port.lat] = row[0]
         portList.append(port)
@@ -194,7 +230,7 @@ with open('tracking.csv', newline='') as trackingfile:
         rowcount+=1
         # create tracking point with given row
 
-        # find a better way to deal with null values
+        # find a better way to deal with null values (cleaned up these values in VoyageDataCleaner by replacing with averages)
         if (row[4] == 'NULL'):
             row[4] = 1
         if (row[5] == 'NULL'):
@@ -273,6 +309,7 @@ with open('predict.csv', 'w', newline='') as predictfile:
 
         testToPandas = pd.to_datetime(finalStartDate)
         testToPandas = pd.to_datetime(finalEndDate)
+
         for voyageID in range(1, 4):
             predictWriter.writerow([key, startingPortID, endingPortID, str(voyageID)])
 
